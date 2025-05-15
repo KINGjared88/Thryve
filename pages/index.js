@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
@@ -34,9 +33,15 @@ export default function Home() {
         body: JSON.stringify({ message: input }),
       });
       const data = await res.json();
-      setMessages([...newMessages, { role: "assistant", content: data.reply }]);
+      setMessages([
+        ...newMessages,
+        { role: "assistant", content: data.reply || "No response from server." },
+      ]);
     } catch (error) {
-      setMessages([...newMessages, { role: "assistant", content: "Error contacting server. Please try again." }]);
+      setMessages([
+        ...newMessages,
+        { role: "assistant", content: "Error contacting server. Please try again." },
+      ]);
     }
     setLoading(false);
   };
@@ -97,23 +102,48 @@ export default function Home() {
                 ❌
               </button>
             </div>
-            <div style={{ flex: 1, padding: "10px", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                flex: 1,
+                padding: "10px",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               {messages.map((m, i) => (
                 <div
                   key={i}
                   style={{
-                    backgroundColor: m.role === "user" ? "#e6f7ff" : "#edfff2",
-                    padding: "8px 14px",
-                    borderRadius: "18px",
-                    margin: "6px 0",
-                    maxWidth: "85%",
-                    alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-                    whiteSpace: "pre-wrap",
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: m.role === "user" ? "flex-end" : "flex-start",
                   }}
                 >
-                  <strong>{m.role === "user" ? "You" : "Thryve"}:</strong>
-                  <ReactMarkdown>{m.content}</ReactMarkdown>
+                  <div
+                    style={{
+                      display: "inline-block",
+                      backgroundColor: m.role === "user" ? "#e6f7ff" : "#edfff2",
+                      color: "#222",
+                      padding: "10px 16px",
+                      borderRadius: m.role === "user"
+                        ? "18px 18px 4px 18px"
+                        : "18px 18px 18px 4px",
+                      margin: "6px 0",
+                      maxWidth: "80%",
+                      minWidth: "60px",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                      wordBreak: "break-word",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    <strong>
+                      {m.role === "user" ? "You" : "Thryve"}:
+                    </strong>{" "}
+                    <span>
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    </span>
+                  </div>
                 </div>
               ))}
               <div ref={bottomRef} />
@@ -125,7 +155,13 @@ export default function Home() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
-                style={{ flex: 1, padding: "10px", border: "none" }}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  border: "none",
+                  outline: "none",
+                  fontSize: "15px",
+                }}
                 disabled={loading}
               />
               <button
@@ -138,6 +174,8 @@ export default function Home() {
                   border: "none",
                   cursor: "pointer",
                   fontWeight: "bold",
+                  borderTopRightRadius: "12px",
+                  borderBottomRightRadius: "12px",
                 }}
               >
                 {loading ? "..." : "Send"}
