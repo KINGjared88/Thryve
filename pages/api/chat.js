@@ -1,24 +1,21 @@
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { message } = req.body;
+  const { messages } = req.body;
 
-  if (!message) {
-    return res.status(400).json({ message: "No message provided" });
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ message: "Invalid request format" });
   }
 
   try {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo", // or gpt-4 if you're on a paid plan
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
@@ -57,17 +54,14 @@ Links to use:
 - DIY Credit Kit: https://thryvecredit.com/dyicreditkit
 - Done-For-You Core Plan: https://thryvecredit.com/thryve-core-plan
 - Schedule a time to talk: https://thryvecredit.com/consultation
-- Send us a message: https://thryvecredit.com/contact-us`,
+- Send us a message: https://thryvecredit.com/contact-us`
         },
-        { role: "user", content: message },
+        ...messages
       ],
       temperature: 0.6,
     });
 
-    // 🧠 Smart error handling here
-    const reply =
-      completion.data?.choices?.[0]?.message?.content || "Sorry, I didn’t catch that. Can you try again?";
-
+    const reply = completion.choices[0]?.message?.content ?? "Sorry, I didn’t catch that. Can you try again?";
     res.status(200).json({ reply });
   } catch (error) {
     console.error("OpenAI API Error:", error?.response?.data || error.message);
