@@ -20,19 +20,5 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'No messages provided' });
     }
 
-    try {
-        const completion = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
-            messages: messages,
-        });
-        const reply = completion.data.choices[0].message?.content || '';
-        res.status(200).json({ reply });
-    } catch (error) {
-        console.error('OpenAI API Error:', error);
-        if (error.response) {
-            res.status(error.response.status).json({ error: `OpenAI API error: ${error.response.data.error.message}` });
-        } else {
-            res.status(500).json({ error: 'An error occurred while processing your request.' });
-        }
-    }
+  res.status(200).json({ reply: "This is a test response." });
 }
