@@ -1,24 +1,27 @@
-import OpenAI from "openai";
+// pages/api/chat.js
+import OpenAI from 'openai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
   }
 
   const { messages } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ message: "Invalid request format" });
+    return res.status(400).json({ message: 'Invalid request. Missing messages array.' });
   }
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-3.5-turbo',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `You are the AI assistant for Thryve Credit Solutions, a professional and trusted credit repair company. Your job is to assist website visitors by answering their questions clearly, professionally, and confidently—without giving step-by-step coaching or legal advice.
 
 Your tone is friendly, helpful, and knowledgeable. You serve as a virtual concierge—offering information, clarifying options, and directing visitors to the appropriate next step. When helpful, recommend Thryve’s DIY Credit Kit or Done-For-You credit repair service.
@@ -56,15 +59,15 @@ Links to use:
 - Schedule a time to talk: https://thryvecredit.com/consultation
 - Send us a message: https://thryvecredit.com/contact-us`
         },
-        ...messages
+        ...messages,
       ],
       temperature: 0.6,
     });
 
-    const reply = completion.choices[0]?.message?.content ?? "Sorry, I didn’t catch that. Can you try again?";
-    res.status(200).json({ reply });
+    const reply = completion.choices?.[0]?.message?.content || "Sorry, I didn’t catch that. Can you try again?";
+    res.status(200).json({ message: reply });
   } catch (error) {
-    console.error("OpenAI API Error:", error?.response?.data || error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('OpenAI API Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
